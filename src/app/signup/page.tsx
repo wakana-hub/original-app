@@ -2,6 +2,17 @@
 import { Box, Button, Container, Paper, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react"
+import { z } from "zod";
+
+const SignupSchema = z.object({
+    name: z.string().min(1, "名前は必須です"),
+    email: z.string().email("正しいメールアドレスを入力してください"),
+    password: z.string()
+      .min(8, "パスワードは8文字以上で入力してください")
+      .max(16, "パスワードは16文字以内で入力してください")
+      .regex(/^[a-zA-Z0-9]+$/, "パスワードは英数字のみ使用できます"),
+    auth_id: z.string().min(1, "IDは必須です"),
+  });
 
 export default function SignupPage () {
     const[name,setName]=useState("");
@@ -14,17 +25,25 @@ export default function SignupPage () {
     const handleSubmit = async(event:React.FormEvent) =>{
         event.preventDefault();
 
+        const formData = {
+            name,
+            email,
+            password,
+            auth_id: authId
+          };
+        
+          const result = SignupSchema.safeParse(formData);
+          if (!result.success) {
+            alert(result.error.errors[0].message); // 最初のエラーを表示
+            return;
+          }
+
         const response =await fetch('/api/auth/signup',{
             method:'POST',// HTTPメソッド（POSTリクエスト）
             headers:{
                 'Content-Type':'application/json',
             },// 送信するデータはJSON形式であることを指定
-            body:JSON.stringify({
-                name,
-                email,
-                password,
-                auth_id:authId            
-            }) // 送信するデータをJSON文字列に変換
+            body:JSON.stringify(       formData) // 送信するデータをJSON文字列に変換
         });
 
         console.log({ name, email, password, authId });
