@@ -38,6 +38,10 @@ export default function SigninPage(){
           }
         };
 
+    const handleSignup = () => {
+      router.push("./signup");
+    }    
+
     return(
             <Container maxWidth="sm" >
             <Paper elevation={3} sx={{padding:4, mt:5}}>
@@ -79,6 +83,15 @@ export default function SigninPage(){
                 sx={{ mt: 3 }}
                 >
                 ログイン
+                </Button>
+                <Button
+                type="button"
+                color="primary"
+                fullWidth
+                sx={{ mt: 3 }}
+                onClick={handleSignup}
+                >
+                新規登録
                 </Button>
             </Box>
         </Paper>
