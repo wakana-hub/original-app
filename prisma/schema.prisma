@@ -76,6 +76,7 @@ model Post {
   inquirerRelationship  Relationship? // 問い合わせ者続柄（選択、任意）
   inquirerRelationshipOther String?//問い合わせ者続柄その他の詳細
   category Category     // カテゴリー（列挙型）
+  message String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
