@@ -24,14 +24,25 @@ export default function SigninPage(){
             });
         
             const result = await res.json();
+            console.log("API結果:", result);
         
             if (!res.ok) {
-              setError(result.error || 'ログインに失敗しました');
+              setError(result?.error || 'ログインに失敗しました');
               return;
             }
-        
-            alert("ログイン成功！");
-            router.push('/mypage');
+
+       // ログイン成功時にアクセストークンとユーザー情報をlocalStorageに保存
+       console.log("hoge",result.session.session.access_token)
+      if (result.session.session.access_token && result.session.user){
+        localStorage.setItem('access_token', result.session.access_token);
+        // 必要に応じてユーザー情報も保存
+        localStorage.setItem('user', JSON.stringify(result.session.user));
+         router.push('/dashboard')
+      }
+        else {
+          setError('セッション情報が不正です');
+          }
+       
           } catch (error) {
             console.error("認証中のエラー:", error);
             setError('通信エラーが発生しました');
@@ -39,8 +50,10 @@ export default function SigninPage(){
         };
 
     const handleSignup = () => {
-      router.push("./signup");
-    }    
+      router.push("/signup");
+    }
+    
+    
 
     return(
             <Container maxWidth="sm" >
@@ -73,7 +86,7 @@ export default function SigninPage(){
                 {error && (
                 <Typography color="error" sx={{ mt: 2 }}>
                 {error} {/* エラーメッセージを表示 */}
-                 </Typography>
+                 </Typography> 
                  )}
                 <Button
                 type="submit"
@@ -85,7 +98,6 @@ export default function SigninPage(){
                 ログイン
                 </Button>
                 <Button
-                type="button"
                 color="primary"
                 fullWidth
                 sx={{ mt: 3 }}
