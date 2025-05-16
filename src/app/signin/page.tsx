@@ -3,6 +3,7 @@
 import { Box, Button, Container, Paper, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import supabase from "../../utils/supabase/supabaseClient"
 
 export default function SigninPage(){
     const[authId,setAuthId]=useState("");
@@ -11,49 +12,43 @@ export default function SigninPage(){
 
     const router = useRouter();
 
-    const handleSubmit =async(event:React.FormEvent)=>{
-        event.preventDefault();
+    const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
 
-        console.log("フォーム送信:", authId, password);
+    setError(null); // 送信前にエラークリア
 
-        try {
-            const res = await fetch('/api/auth/signin', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ authId, password }),
-            });
-        
-            const result = await res.json();
-            console.log("API結果:", result);
-        
-            if (!res.ok) {
-              setError(result?.error || 'ログインに失敗しました');
-              return;
-            }
+    // auth_idからemailを取得
+    const { data: userData, error: userError } = await supabase
+      .from('user')
+      .select('email')
+      .eq('auth_id', authId)
+      .single();
 
-       // ログイン成功時にアクセストークンとユーザー情報をlocalStorageに保存
-       console.log("hoge",result.session.session.access_token)
-      if (result.session.session.access_token && result.session.user){
-        localStorage.setItem('access_token', result.session.access_token);
-        // 必要に応じてユーザー情報も保存
-        localStorage.setItem('user', JSON.stringify(result.session.user));
-         router.push('/dashboard')
-      }
-        else {
-          setError('セッション情報が不正です');
-          }
-       
-          } catch (error) {
-            console.error("認証中のエラー:", error);
-            setError('通信エラーが発生しました');
-          }
-        };
+    if (userError || !userData?.email) {
+      setError('ユーザーが見つかりません');
+      return;
+    }
+
+    // パスワード認証
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      email: userData.email,
+      password: password,
+    });
+
+    console.log('ログイン成功:', data.session);
+
+    if (signInError) {
+      setError("IDもしくはパスワードが間違っています");
+      return;
+    }
+
+    // ログイン成功後はダッシュボードに遷移
+    router.push("/dashboard");
+  };
 
     const handleSignup = () => {
       router.push("/signup");
     }
-    
-    
 
     return(
             <Container maxWidth="sm" >
@@ -73,10 +68,12 @@ export default function SigninPage(){
                 value={authId}
                 onChange={(e) => setAuthId(e.target.value)}
                 required
+                autoComplete="username"
                 />
                 <TextField
                 label="パスワード"
                 type="password"
+                autoComplete="current-password"
                 fullWidth
                 margin="normal"
                 value={password}

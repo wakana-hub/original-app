@@ -21,6 +21,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import supabase from '../../utils/supabase/supabaseClient'
 
 export default function DashBoard() {
   const drawerWidth = 240;
@@ -62,34 +63,54 @@ export default function DashBoard() {
 
   const router = useRouter();
 
-  const handleLogout = () => {
-    // ログアウト処理（localStorageから情報を削除）
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user');
-    router.push('/signin'); // ← ログイン画面に移動
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/signin');
+  };
+
+  // ここでユーザー名を user テーブルから取得する関数を作成
+  const fetchUserNameFromTable = async (userId: string): Promise<string | null> => {
+    const { data, error } = await supabase
+      .from('user') 
+      .select('name')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('ユーザー名取得エラー:', error);
+      return null;
+    }
+    return data?.name || null;
   };
 
   useEffect(() => {
-    // ログインしたユーザー情報をlocalStorageから取得
-    const storedUser = localStorage.getItem('user');
-    console.log("取得したユーザー情報:", storedUser); 
+    const fetchUser = async () => {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-    if (!storedUser) {
-      console.log("ユーザー情報がないためサインインページにリダイレクトします");
-      router.push('/signin'); // ユーザー情報がない場合はサインインページへリダイレクト
-      return;
-    }
+      console.log(session)
 
-    try {
-      const user = JSON.parse(storedUser);
-      setUserName(user?.name || null);
-      setLoading(false); // ロード完了
-    } catch (error) {
-      console.error("ユーザー情報の読み込みエラー:", error);
-      setUserName(null); // セッション情報が不正な場合、ユーザー名をnullに設定
-     setLoading(false); // ローディング完了
-      router.push('/signin'); // エラーがあればサインインページにリダイレクト
-    }
+      if (sessionError || !session) {
+        console.log("ログインセッションなし → サインインへ");
+        router.push('/signin');
+        return;
+      }
+
+      const userId = session.user.id;
+
+      // user_metadataからname取得を試みる
+      const nameFromMetadata = session.user.user_metadata?.name;
+
+      if (nameFromMetadata) {
+        setUserName(nameFromMetadata);
+      } else {
+        // なければ自作userテーブルから取得
+        const nameFromTable = await fetchUserNameFromTable(userId);
+        setUserName(nameFromTable?? session.user.email?? null);
+      }
+      setLoading(false);
+    };
+
+    fetchUser();
   }, [router]);
   
   if (loading) {
@@ -138,7 +159,7 @@ export default function DashBoard() {
             DashBoard
           </Typography>
           {/* ユーザー名を表示 */}
-          {userName && <Typography color="inherit" sx={{ marginRight: 2 }}>ようこそ, {userName}</Typography>}
+          {userName && <Typography color="inherit" sx={{ marginRight: 2 }}>ようこそ, {userName}さん</Typography>}
           <Button color="inherit" onClick={handleLogout}>ログアウト</Button>
         </Toolbar>
       </AppBar>
@@ -180,8 +201,18 @@ export default function DashBoard() {
         </Button>
       </Box>
       
-        {/* カレンダー */}
-      <Box sx={{ mt: 4}}>
+      <Box
+  sx={{
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 4,
+    mt: 4,
+    height: 400,
+  }}
+>
+  {/* カレンダー */}
+  <Box sx={{ flex: 1 }}>
         <Typography variant="h6" gutterBottom>対応履歴カレンダー</Typography>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateCalendar
@@ -202,7 +233,7 @@ export default function DashBoard() {
           />
         </LocalizationProvider>
       </Box>
-            <Box sx={{flex: 1, minWidth: 300,height: 'auto' }}>
+            <Box sx={{flex:1 }}>
       <Typography variant="h6" gutterBottom>対応履歴の件数</Typography>
       <ResponsiveContainer width="60%" height={300}>
         <BarChart data={data}>
@@ -213,6 +244,7 @@ export default function DashBoard() {
           <Bar dataKey="count" fill="#1976d2" />
         </BarChart>
       </ResponsiveContainer>
+      </Box>
       </Box>
       </Box>
       </Box>
