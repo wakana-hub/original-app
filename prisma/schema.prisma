@@ -62,6 +62,11 @@ enum Category {
   @@map("category")
 }
 
+enum PostStatus {
+  INCOMPLETE // 未完了
+  COMPLETE   // 完了
+}
+
 model Post {
   id Int @id @default(autoincrement())
   user User @relation(fields:[userId],references: [id])
@@ -77,6 +82,7 @@ model Post {
   inquirerRelationshipOther String?//問い合わせ者続柄その他の詳細
   category Category     // カテゴリー（列挙型）
   message String
+  status PostStatus @default(INCOMPLETE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
