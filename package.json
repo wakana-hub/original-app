@@ -9,12 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@date-io/date-fns": "^3.2.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fontsource/roboto": "^5.2.5",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.1.0",
-    "@mui/x-date-pickers": "^8.3.0",
+    "@mui/x-date-pickers": "^8.3.1",
     "@prisma/client": "^6.7.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.6.1",
