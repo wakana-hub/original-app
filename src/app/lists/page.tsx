@@ -55,6 +55,7 @@ export default function ResponseListPage() {
   const [activeTab, setActiveTab] = useState<FilterKey>('date');
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -112,7 +113,16 @@ export default function ResponseListPage() {
   return label;
 };
 
-  const filteredData = posts.filter((row) => {
+const sortedPosts = [...posts].sort((a, b) => {
+  const numA = Number(a.id);
+  const numB = Number(b.id);
+  if (!isNaN(numA) && !isNaN(numB)) {
+    return numA - numB;
+  }
+  return a.id.localeCompare(b.id);
+});
+
+  const filteredData =sortedPosts.filter((row) => {
   const dateObj = dayjs(row.date); 
   const month = dateObj.format('MM');
   const day = dateObj.format('DD');
@@ -186,11 +196,22 @@ export default function ResponseListPage() {
 
   return (
       <Layout title="対応履歴一覧">
-      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+      <Box component="main" sx={{ flexGrow: 1}}>
         <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
-          <Button variant="contained" color="primary" onClick={() => router.push('/create')}>新規作成</Button>
-          <Box sx={{ border: '1px solid #ccc', borderRadius: 1, padding: 2, ml: 3 }}>
-            <Typography variant="h6">今日の件数: {todayDataCount}件</Typography>
+          <Button variant="contained" color="primary" sx={{
+            mt: 3,
+            alignSelf: 'flex-start', 
+            backgroundColor: '#4caf50', 
+            color: '#fff', 
+            fontSize: '1.1rem',   
+            px: 4,                       
+            py: 2,   
+            '&:hover': {
+              backgroundColor: '#43a047', // ホバー色調整
+            },
+          }}onClick={() => router.push('/create')}>新規作成</Button>
+          <Box sx={{ border: '1px solid #ccc', borderRadius: 1, padding: 1.5, ml: 3 ,display: 'flex',justifyContent: 'center' ,alignItems: 'center',}}>
+            <Typography variant="h6"sx={{ mb: 0 }}>今日の件数: {todayDataCount}件</Typography>
           </Box>
         </Box>
 
@@ -273,7 +294,26 @@ export default function ResponseListPage() {
               renderInput={(params) => <TextField {...params} label="カテゴリー" size="small" fullWidth sx={{ mt: 2, mb: 1 }} />}
             />
           )}
+          <Button
+            variant="outlined"
+            sx={{ mt: 2, ml: 2 }}
+            onClick={() =>
+              setFilters({
+                number: '',
+                dateMonth: '',
+                dateDay: '',
+                responder: '',
+                status: '',
+                inquiryType: '',
+                category: '',
+                message: '',
+              })
+            }
+          >
+            フィルターリセット
+          </Button> 
         </Box>
+
 
         <Typography variant="h5" gutterBottom>対応履歴一覧</Typography>
         <TableContainer component={Paper}>
