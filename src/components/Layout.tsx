@@ -22,7 +22,7 @@ export default function Layout({ children, title = 'ダッシュボード' }: Pr
 
   const navItems = [
     { label: 'ホーム', path: '/dashboard' },
-    { label: '対応履歴一覧', path: '/list' },
+    { label: '対応履歴一覧', path: '/lists' },
     { label: 'ユーザー設定', path: '/settings' },
   ];
 

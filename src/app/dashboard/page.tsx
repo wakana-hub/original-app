@@ -33,19 +33,10 @@ export default function DashBoard() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null); // ユーザー名を追加
   const [loading, setLoading] = useState(true);
-   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs()); // 
+   const [selectedDate] = useState<Dayjs | null>(dayjs()); //
+   const [activeDates, setActiveDates] = useState<string[]>([]);
+  const [data, setData] = useState<{ date: string; count: number }[]>([]); 
    
-   // 例: サーバーやSupabaseから取得した対応履歴のある日付リスト
-  const activeDates = [
-  '2025-05-11',
-  '2025-05-12',
-  ]
-  const data = [
-  { date: '2025-05-10', count: 2 },
-  { date: '2025-05-11', count: 5 },
-  { date: '2025-05-12', count: 3 },
-];
-
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
   };
@@ -54,6 +45,7 @@ export default function DashBoard() {
   const formatted = date.format('YYYY-MM-DD');
   return activeDates.includes(formatted);
 };
+  const router = useRouter();
 
   const handleDateChange = (date: Dayjs | null) => {
   if (!date || !isDateEnabled(date)) return; // 有効な日付以外は無視
@@ -61,7 +53,6 @@ export default function DashBoard() {
   router.push(`/list?date=${isoDate}`);
 };
 
-  const router = useRouter();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -81,6 +72,27 @@ export default function DashBoard() {
       return null;
     }
     return data?.name || null;
+  };
+
+   const fetchPostSummary = async () => {
+    const { data, error } = await supabase
+      .from('post')
+      .select('startTime', { count: 'exact' });
+
+    if (error || !data) return;
+
+    const counts: Record<string, number> = {};
+    for (const post of data) {
+      const date = dayjs(post.startTime).format('YYYY-MM-DD');
+      counts[date] = (counts[date] || 0) + 1;
+    }
+
+    const summary = Object.entries(counts)
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    setData(summary);
+    setActiveDates(summary.map(item => item.date));
   };
 
   useEffect(() => {
@@ -111,6 +123,7 @@ export default function DashBoard() {
     };
 
     fetchUser();
+    fetchPostSummary();
   }, [router]);
   
   if (loading) {
@@ -183,7 +196,7 @@ export default function DashBoard() {
         <Button
           variant="contained"
           size="large"
-          onClick={() => router.push('/list')} // クリック時に「対応履歴一覧」ページへ遷移
+          onClick={() => router.push('/lists')} // クリック時に「対応履歴一覧」ページへ遷移
            sx={{
             mt: 3,
             alignSelf: 'flex-start',     // 左寄せ
