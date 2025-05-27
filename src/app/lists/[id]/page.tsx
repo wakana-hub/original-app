@@ -11,6 +11,10 @@ import {
   categoryLabel,
   postStatusLabel,
 } from '@/app/enums'
+import dayjs from "dayjs"
+
+dayjs.extend(utc);
+dayjs.extend(timezone)
 
 type User = {
   name: string
@@ -38,11 +42,18 @@ export default function PostDetailPage() {
   const { id } = useParams()
   const router = useRouter()
 
-  const [formData, setFormData] = useState<Post | null>(null)
+  const [formData, setFormData] = useState<Post | null>(null);
+
+  const Jststarttime=dayjs.utc(formData?.startTime).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');
+
+  const Jstendtime=dayjs.utc(formData?.endTime).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');
+
+  console.log('A',Jststarttime);
+  console.log('B',Jstendtime);
 
   useEffect(() => {
     const fetchPost = async () => {
-      const res = await fetch(`/api/posts/${id}`)
+      const res = await fetch(`/api/lists/${id}`)
       if (!res.ok) {
         alert('投稿が見つかりません')
         router.push('/lists')
@@ -92,8 +103,8 @@ export default function PostDetailPage() {
   return (
     <Layout title="投稿詳細">
       <Box sx={{ p: 4 }}>
-        {renderReadOnlyField('対応開始日時', formData.startTime)}
-        {renderReadOnlyField('対応終了日時', formData.endTime)}
+        {renderReadOnlyField('対応開始日時', Jststarttime)}
+        {renderReadOnlyField('対応終了日時', Jstendtime)}
         {renderReadOnlyField('対応者', formData.user?.name)}
         {renderReadOnlySelect('ステータス', formData.status, postStatusLabel)}
         {renderReadOnlySelect('受架電', formData.inquiryType, inquiryTypeLabel)}
@@ -112,7 +123,7 @@ export default function PostDetailPage() {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => router.push(`/posts/${id}/edit`)}
+            onClick={() => router.push(`/lists/${id}/edit`)}
           >
             編集
           </Button>
