@@ -1,7 +1,12 @@
-// src/app/api/posts/route.ts
+// src/app/api/lists/route.ts
 import { NextResponse } from 'next/server';
-import supabase from '../../../utils/supabase/supabaseClient'
-import { PrismaClient } from '@prisma/client'
+import supabase from '../../../utils/supabase/supabaseServerClient'
+import { PrismaClient,InquiryType } from '@prisma/client'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 export async function GET() {
   const { data, error } = await supabase
@@ -44,27 +49,21 @@ export async function POST(request: Request) {
       inquirerRelationship,
       inquirerRelationshipOther,
       remarks,
-      auth_id,
+      auth_id, 
     } = body
 
-    // auth_id チェック
     if (!auth_id) {
-      return NextResponse.json(
-        { success: false, error: 'auth_id がありません' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: 'ユーザーIDがありません' }, { status: 400 })
     }
 
-    // ユーザーを auth_id で検索
-    const user = await prisma.user.findUnique({
-      where: { auth_id },
-    })
+      if (!Object.values(InquiryType).includes(inquiryType)) {
+      return NextResponse.json({ success: false, error: 'inquiryTypeの値が不正です' }, { status: 400 })
+    }
+
+    const user = await prisma.user.findUnique({ where: { auth_id} })
 
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: '該当するユーザーが存在しません' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: '該当するユーザーが存在しません' }, { status: 404 })
     }
 
     // post 作成（userと紐付け + user.name も含めて返す）
@@ -76,12 +75,12 @@ export async function POST(request: Request) {
         inquiryType,
         category,
         message,
-        inquirerName:              inquirerName || null,
-        inquirerGender:            inquirerGender || null,
-        inquirerPhone:             inquirerPhone || null,
-        inquirerRelationship:      inquirerRelationship || null,
+        inquirerName: inquirerName || null,
+        inquirerGender: inquirerGender || null,
+        inquirerPhone: inquirerPhone || null,
+        inquirerRelationship: inquirerRelationship || null,
         inquirerRelationshipOther: inquirerRelationshipOther || null,
-        remarks:                   remarks || null,
+        remarks: remarks || null,
         auth_id,
         user: {
           connect: { id: user.id },
@@ -91,6 +90,7 @@ export async function POST(request: Request) {
         user: {
           select: {
             name: true,
+            auth_id: true,
           },
         },
       },
@@ -99,9 +99,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, data: newPost }, { status: 201 })
   } catch (error) {
     console.error('[POST ERROR]', error)
-    return NextResponse.json(
-      { success: false, error: '登録に失敗しました' },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: '登録に失敗しました' }, { status: 500 })
   }
 }
