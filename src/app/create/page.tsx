@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { TextField, Button, MenuItem, Box } from '@mui/material'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import Layout from '../../components/Layout'
 import supabase from '../../utils/supabase/supabaseClient'
 import {
@@ -14,11 +16,14 @@ import {
   postStatusLabel,
 } from '../enums'
 
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 export default function CreatePostPage() {
   const router = useRouter()
 
   const [formData, setFormData] = useState({
-    startTime: dayjs().format('YYYY-MM-DDTHH:mm'),
+    startTime: dayjs().tz('Asia/Tokyo').format('YYYY-MM-DDTHH:mm'),
     endTime: undefined,
     responder: '',
     status: '',
@@ -36,27 +41,36 @@ export default function CreatePostPage() {
 
   useEffect(() => {
   const fetchResponder = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (user && !userError) {
       const { data, error } = await supabase
         .from('user')
-        .select('name')
-        .eq('auth_id', user.id)  
-        .single()
+        .select('name, auth_id')
+        .eq('id', user.id)  
+        .maybeSingle()  
+        
+        console.log(data)
+       
       if (!error && data) {
-        setFormData((prev) => ({ ...prev, responder: data.name,
-        auth_id: user.id,  
-         }))
-        } else {
-          setFormData((prev) => ({
-            ...prev,
-            auth_id: user.id,
-          })) 
+        setFormData((prev) => ({
+          ...prev,
+          responder: data.name,
+          auth_id: data.auth_id,
+        }))
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          auth_id: '',
+        }))
+        console.error('名前の取得に失敗:', error)
       }
+    } else {
+      console.error('ユーザー情報の取得に失敗:', userError)
+      router.push('/signin')
     }
   }
   fetchResponder()
-}, [])
+},  [router])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -89,6 +103,8 @@ export default function CreatePostPage() {
     </TextField>
   )
 
+  console.log('フォームデータ',formData)
+
   const handleSubmit = async () => {
   if (!formData.auth_id) {
     alert('ログイン情報が取得できていません。再ログインしてください。');
@@ -96,17 +112,26 @@ export default function CreatePostPage() {
     return;
   }
 
-  const res = await fetch('/api/posts', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(formData),
-  });
+   const startTimeJST = dayjs(formData.startTime).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');
+    const endTimeJST = formData.endTime
+      ? dayjs(formData.endTime).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss')
+      : null;
 
+    const res = await fetch('/api/lists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...formData,
+        startTime: startTimeJST,
+        endTime: endTimeJST,
+      }),
+    });
+    
   const json = await res.json();
   if (!res.ok) {
     // サーバーから返ってきた error メッセージを表示
     console.error('投稿エラー:', json.error);
-    alert(`投稿に失敗しました: ${json.error}`);
+    alert('投稿に失敗しました: ${json.error}');
     return;
   }
 
@@ -125,6 +150,7 @@ export default function CreatePostPage() {
           margin="normal"
           value={formData.startTime}
           onChange={handleChange}
+          
         />
         <TextField
           label="対応終了日時"
