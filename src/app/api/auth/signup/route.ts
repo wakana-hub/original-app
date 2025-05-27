@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";// Next.jsの新しい型をインポート
-import { supabaseServer } from "../../../utils/supabaseServer"; 
-import { SignupData } from "../../../type/signup"
+import { createServerClient } from "../../../../utils/supabase/server" 
 import bcrypt from 'bcryptjs';
+
+type SignupData={
+    name: string;
+    email: string;
+    password: string;
+    auth_id: string;  // 任意のID
+}
 
 // POSTリクエストに対応
 export async function POST(req:NextRequest){
@@ -9,8 +15,7 @@ export async function POST(req:NextRequest){
     const body = await req.json();
     console.log("受信データ：",body)
 
-    // body のデータを使用
-    const{name, email, password, auth_id} =body as SignupData;
+   const { name, email, password, auth_id } = body as SignupData;
 
  // 必須項目がすべてあるか確認
 if(!name || !email || !password || !auth_id){
@@ -19,10 +24,11 @@ if(!name || !email || !password || !auth_id){
         {status:400}
     );
 };
-
+    
+const supabase = createServerClient();
 try{
 // Supabaseでユーザーのサインアップ
-    const {error:signUpError} = await supabaseServer.auth.signUp({
+    const {error:signUpError} = await supabase.auth.signUp({
         email,
         password,
     });
@@ -36,7 +42,7 @@ try{
     const hashedPassword = await bcrypt.hash(password, 10);
     
  // サインアップ成功後、Userテーブルに追加のユーザー情報を保存
-    const {data:insertData,error:insertError}  = await supabaseServer
+    const {data:insertData,error:insertError}  = await supabase
     .from('user')   // Userテーブルにデータを挿入
     .insert([
         {
