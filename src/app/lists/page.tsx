@@ -69,7 +69,7 @@ export default function ResponseListPage() {
     const fetchPosts = async () => {
       setLoading(true);
       try {
-        const res = await fetch('/api/posts'); 
+        const res = await fetch('/api/lists'); 
         const data = await res.json();
         if (!res.ok) {
           console.error('APIエラー:', data.error);
@@ -172,7 +172,7 @@ const sortedPosts = [...posts].sort((a, b) => {
   const handleDelete = async (id: string) => {
   if (!confirm('本当に削除しますか？')) return;
   try {
-    const res = await fetch(`/api/posts/${id}`,
+    const res = await fetch(`/api/lists/${id}`,
      { method: 'DELETE' });
     if (!res.ok) {
       alert('削除に失敗しました');

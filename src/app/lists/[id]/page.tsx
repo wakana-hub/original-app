@@ -42,7 +42,7 @@ export default function PostDetailPage() {
 
   useEffect(() => {
     const fetchPost = async () => {
-      const res = await fetch(`/api/posts/${id}`)
+      const res = await fetch(`/api/lists/${id}`)
       if (!res.ok) {
         alert('投稿が見つかりません')
         router.push('/lists')
@@ -112,7 +112,7 @@ export default function PostDetailPage() {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => router.push(`/posts/${id}/edit`)}
+            onClick={() => router.push(`/lists/${id}/edit`)}
           >
             編集
           </Button>
