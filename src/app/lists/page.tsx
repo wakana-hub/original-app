@@ -14,6 +14,11 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from "dayjs"
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 type FilterKey = 'number' | 'date' | 'responder' | 'status' | 'inquiryType' | 'category'| 'message';
 
@@ -334,7 +339,7 @@ const sortedPosts = [...posts].sort((a, b) => {
               {filteredData.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell>{row.id}</TableCell>
-                  <TableCell>{row.date}</TableCell>
+                  <TableCell>{dayjs.utc(row.date).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm')}</TableCell>
                   <TableCell>{row.responder ?? '-'}</TableCell>
                   <TableCell>{postStatusLabel[row.status  as keyof typeof postStatusLabel] ?? row.status}</TableCell>
                   <TableCell>{inquiryTypeLabel[row.inquiryType as keyof typeof inquiryTypeLabel] ?? row.inquiryType}</TableCell>
