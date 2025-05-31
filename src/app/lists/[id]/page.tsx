@@ -11,6 +11,12 @@ import {
   categoryLabel,
   postStatusLabel,
 } from '@/app/enums'
+import dayjs from "dayjs"
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 type User = {
   name: string
@@ -39,7 +45,7 @@ export default function PostDetailPage() {
   const router = useRouter()
 
   const [formData, setFormData] = useState<Post | null>(null)
-
+  
   useEffect(() => {
     const fetchPost = async () => {
       const res = await fetch(`/api/lists/${id}`)
@@ -57,6 +63,16 @@ export default function PostDetailPage() {
   }, [id, router])
 
   if (!formData) return <div>読み込み中...</div>
+
+  const jstStartTime = dayjs
+    .utc(formData.startTime)
+    .tz("Asia/Tokyo")
+    .format("YYYY-MM-DD HH:mm");
+  const jstEndTime = dayjs
+    .utc(formData.endTime)
+    .tz("Asia/Tokyo")
+    .format("YYYY-MM-DD HH:mm");
+
 
   const renderReadOnlyField = (label: string, value: string | undefined) => (
     <TextField
@@ -92,8 +108,8 @@ export default function PostDetailPage() {
   return (
     <Layout title="投稿詳細">
       <Box sx={{ p: 4 }}>
-        {renderReadOnlyField('対応開始日時', formData.startTime)}
-        {renderReadOnlyField('対応終了日時', formData.endTime)}
+        {renderReadOnlyField('対応開始日時', jstStartTime)}
+        {renderReadOnlyField('対応終了日時', jstEndTime)}
         {renderReadOnlyField('対応者', formData.user?.name)}
         {renderReadOnlySelect('ステータス', formData.status, postStatusLabel)}
         {renderReadOnlySelect('受架電', formData.inquiryType, inquiryTypeLabel)}
