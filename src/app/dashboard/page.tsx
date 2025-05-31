@@ -41,18 +41,22 @@ export default function DashBoard() {
     setDrawerOpen(!drawerOpen);
   };
 
- const isDateEnabled = (date: Dayjs) => {
-  const formatted = date.format('YYYY-MM-DD');
+ const isDateEnabled = (date: Dayjs | Date) => {
+  const dayjsDate = dayjs(date); 
+   const formatted = dayjsDate.format('YYYY-MM-DD');
   return activeDates.includes(formatted);
 };
   const router = useRouter();
 
-  const handleDateChange = (date: Dayjs | null) => {
-  if (!date || !isDateEnabled(date)) return; // 有効な日付以外は無視
+ const handleDateChange = (value: Dayjs | Date | null) => {
+  if (!value) return;
+
+  const date = dayjs(value); // Dayjs に変換
+  if (!date.isValid() || !isDateEnabled(date)) return;
+
   const isoDate = date.format('YYYY-MM-DD');
   router.push(`/list?date=${isoDate}`);
 };
-
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
