@@ -96,6 +96,7 @@ export async function PUT(
       inquirerRelationship,
       inquirerRelationshipOther,
       remarks,
+      updated_at: new Date().toISOString(),
     })
     .eq('id', id)
 

@@ -11,6 +11,12 @@ import {
   categoryLabel,
   postStatusLabel,
 } from '@/app/enums'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 type Post = {
   id: string
@@ -48,9 +54,20 @@ export default function PostEditPage() {
         return
       }
       const data = await res.json()
+
+      // JSTに変換して datetime-local に渡せる形式に
+      data.startTime = dayjs.utc(data.startTime).tz('Asia/Tokyo').format('YYYY-MM-DDTHH:mm')
+      data.endTime = data.endTime
+        ? dayjs.utc(data.endTime).tz('Asia/Tokyo').format('YYYY-MM-DDTHH:mm')
+        : ''
+      console.log(data.startTime)
+      console.log(data.endTime)
+     
+
       setFormData(data)
       setLoading(false)
     }
+
     fetchPost()
   }, [id, router])
 
@@ -63,14 +80,21 @@ export default function PostEditPage() {
   const handleSubmit = async () => {
     setSaving(true)
     try {
-       const postDataWithoutUser = { ...formData }
-delete postDataWithoutUser.user
-     const res = await fetch(`/api/lists/${id}`, {
+      const postDataWithoutUser = { ...formData }
+      delete postDataWithoutUser.user
+
+      // JST → UTC 変換して ISO 文字列で送信
+      postDataWithoutUser.startTime = dayjs.tz(formData.startTime, 'Asia/Tokyo').utc().toISOString()
+      postDataWithoutUser.endTime = formData.endTime
+        ? dayjs.tz(formData.endTime, 'Asia/Tokyo').utc().toISOString()
+        : ''
+
+      const res = await fetch(`/api/lists/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postDataWithoutUser),
       })
-       if (!res.ok) throw new Error('更新に失敗しました')
+      if (!res.ok) throw new Error('更新に失敗しました')
 
       alert('更新しました')
       router.push(`/lists/${id}`)
@@ -80,7 +104,7 @@ delete postDataWithoutUser.user
       setSaving(false)
     }
   }
-  
+
   return (
     <Layout title="投稿編集">
       <Box sx={{ p: 4, maxWidth: 700 }}>
@@ -89,7 +113,7 @@ delete postDataWithoutUser.user
           type="datetime-local"
           fullWidth
           margin="normal"
-          value={formData.startTime}
+          value={formData.startTime ?? ''}
           onChange={(e) => handleChange('startTime', e.target.value)}
           InputLabelProps={{ shrink: true }}
         />
@@ -98,7 +122,7 @@ delete postDataWithoutUser.user
           type="datetime-local"
           fullWidth
           margin="normal"
-          value={formData.endTime}
+          value={formData.endTime ?? ''}
           onChange={(e) => handleChange('endTime', e.target.value)}
           InputLabelProps={{ shrink: true }}
         />
@@ -118,12 +142,9 @@ delete postDataWithoutUser.user
           onChange={(e) => handleChange('status', e.target.value)}
         >
           {Object.entries(postStatusLabel).map(([key, label]) => (
-            <MenuItem key={key} value={key}>
-              {label}
-            </MenuItem>
+            <MenuItem key={key} value={key}>{label}</MenuItem>
           ))}
         </TextField>
-
         <TextField
           label="受架電"
           select
@@ -133,12 +154,9 @@ delete postDataWithoutUser.user
           onChange={(e) => handleChange('inquiryType', e.target.value)}
         >
           {Object.entries(inquiryTypeLabel).map(([key, label]) => (
-            <MenuItem key={key} value={key}>
-              {label}
-            </MenuItem>
+            <MenuItem key={key} value={key}>{label}</MenuItem>
           ))}
         </TextField>
-
         <TextField
           label="カテゴリー"
           select
@@ -148,12 +166,9 @@ delete postDataWithoutUser.user
           onChange={(e) => handleChange('category', e.target.value)}
         >
           {Object.entries(categoryLabel).map(([key, label]) => (
-            <MenuItem key={key} value={key}>
-              {label}
-            </MenuItem>
+            <MenuItem key={key} value={key}>{label}</MenuItem>
           ))}
         </TextField>
-
         <TextField
           label="入電内容"
           multiline
@@ -163,30 +178,25 @@ delete postDataWithoutUser.user
           value={formData.message}
           onChange={(e) => handleChange('message', e.target.value)}
         />
-
         <TextField
           label="問い合わせ者名"
           fullWidth
           margin="normal"
-          value={formData.inquirerGender}
-          onChange={(e) => handleChange('inquirerGender', e.target.value)}
+          value={formData.inquirerName}
+          onChange={(e) => handleChange('inquirerName', e.target.value)}
         />
-
         <TextField
           label="性別"
           select
           fullWidth
           margin="normal"
-          value={formData.inquirerName}
-          onChange={(e) => handleChange('inquirerName', e.target.value)}
+          value={formData.inquirerGender}
+          onChange={(e) => handleChange('inquirerGender', e.target.value)}
         >
           {Object.entries(genderLabel).map(([key, label]) => (
-            <MenuItem key={key} value={key}>
-              {label}
-            </MenuItem>
+            <MenuItem key={key} value={key}>{label}</MenuItem>
           ))}
         </TextField>
-
         <TextField
           label="問い合わせ者連絡先"
           fullWidth
@@ -194,9 +204,8 @@ delete postDataWithoutUser.user
           value={formData.inquirerPhone}
           onChange={(e) => handleChange('inquirerPhone', e.target.value)}
         />
-
         <TextField
-          label="問い合わせ者 続き柄"
+          label="問い合わせ者 続柄"
           select
           fullWidth
           margin="normal"
@@ -204,12 +213,9 @@ delete postDataWithoutUser.user
           onChange={(e) => handleChange('inquirerRelationship', e.target.value)}
         >
           {Object.entries(relationshipLabel).map(([key, label]) => (
-            <MenuItem key={key} value={key}>
-              {label}
-            </MenuItem>
+            <MenuItem key={key} value={key}>{label}</MenuItem>
           ))}
         </TextField>
-
         {formData.inquirerRelationship === 'OTHER' && (
           <TextField
             label="その他の続き柄"
@@ -219,7 +225,6 @@ delete postDataWithoutUser.user
             onChange={(e) => handleChange('inquirerRelationshipOther', e.target.value)}
           />
         )}
-
         <TextField
           label="備考"
           multiline
@@ -229,22 +234,11 @@ delete postDataWithoutUser.user
           value={formData.remarks}
           onChange={(e) => handleChange('remarks', e.target.value)}
         />
-
         <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            disabled={saving}
-          >
+          <Button variant="contained" color="primary" onClick={handleSubmit} disabled={saving}>
             {saving ? '保存中...' : '保存'}
           </Button>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => router.push(`/lists/${id}`)}
-            disabled={saving}
-          >
+          <Button variant="outlined" color="secondary" onClick={() => router.push(`/lists/${id}`)} disabled={saving}>
             キャンセル
           </Button>
         </Stack>
