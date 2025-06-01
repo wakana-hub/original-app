@@ -27,39 +27,42 @@ if(!name || !email || !password || !auth_id){
     
 const supabase = createServerClient();
 try{
-// Supabaseでユーザーのサインアップ
-    const {error:signUpError} = await supabase.auth.signUp({
-        email,
-        password,
-    });
+const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+  email,
+  password,
+});
 
-    if (signUpError) {
-        console.error("Supabase signUp error:", signUpError.message);
-        console.error("Error details:", signUpError.message);
-        return NextResponse.json({error:signUpError.message},{status:400});
-    }
+if (signUpError) {
+  console.error("Supabase signUp error:", signUpError.message);
+  return NextResponse.json({ error: signUpError.message }, { status: 400 });
+}
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
- // サインアップ成功後、Userテーブルに追加のユーザー情報を保存
-    const {data:insertData,error:insertError}  = await supabase
-    .from('user')   // Userテーブルにデータを挿入
-    .insert([
-        {
-            name,
-            email,
-            auth_id,// 任意のID（フロントから受け取る）
-            password:hashedPassword,    
-        },
-    ]);
+const userId = signUpData?.user?.id;
+if (!userId) {
+  return NextResponse.json({ error: "ユーザーIDの取得に失敗しました" }, { status: 500 });
+}
 
-    if(insertError){
-        console.error("Supabase insert error:", insertError.message);
-        console.error("Error details:", insertError.details); 
-        return NextResponse.json({error:insertError.message},
-            {status:400});
-    }
-    return NextResponse.json({message:`サインアップ成功です。`,data:insertData});
+const hashedPassword = await bcrypt.hash(password, 10);
+
+const { data: insertData, error: insertError } = await supabase
+  .from("user")
+  .insert([
+    {
+      id: userId,    
+      name,
+      email,
+      auth_id,
+      password: hashedPassword,
+    },
+  ]);
+
+if (insertError) {
+  console.error("Supabase insert error:", insertError.message);
+  return NextResponse.json({ error: insertError.message }, { status: 400 });
+}
+
+return NextResponse.json({ message: "サインアップ成功です。", data: insertData });
+
 } catch(error) {
     return NextResponse.json({error: `サインアップ処理中にエラーが発生しました: ${error instanceof Error ? error.message : "不明なエラー"}` },{status:500});
 }

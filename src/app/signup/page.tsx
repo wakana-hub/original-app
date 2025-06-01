@@ -39,11 +39,11 @@ export default function SignupPage () {
           }
 
         const response =await fetch('/api/auth/signup',{
-            method:'POST',// HTTPメソッド（POSTリクエスト）
+            method:'POST',
             headers:{
                 'Content-Type':'application/json',
-            },// 送信するデータはJSON形式であることを指定
-            body:JSON.stringify(       formData) // 送信するデータをJSON文字列に変換
+            },
+            body:JSON.stringify(       formData) 
         });
 
         console.log({ name, email, password, authId });
@@ -52,7 +52,7 @@ export default function SignupPage () {
 
         if(response.ok){
             alert('サインアップ成功');
-            router.push('./signin')
+            router.push('/signin')
         }else{
             alert(`エラー:${data.error}`)
         }
