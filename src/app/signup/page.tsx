@@ -94,6 +94,7 @@ export default function SignupPage () {
                 margin="normal"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                inputProps={{ maxLength: 16 }}
                 required
                 />
                 <TextField
