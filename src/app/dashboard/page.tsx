@@ -28,7 +28,7 @@ export default function DashBoard() {
   const navItems = [
   { label: 'ホーム', path: 'dashboard' },
   { label: '対応履歴一覧', path: '/lists' },
-  { label: 'ユーザー設定', path: '/settings' },
+  { label: 'ユーザー設定', path: '/user' },
 ];
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null); // ユーザー名を追加
