@@ -1,11 +1,11 @@
+import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
-import { createServerClient } from '../../../../utils/supabase/server'
 
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createServerClient()
+  const supabase = createSupabaseServerClient()
 
   const { id } = params;
 
@@ -29,7 +29,7 @@ export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createServerClient();
+  const supabase = createSupabaseServerClient();
 
   const { id } = params;
 
@@ -55,7 +55,7 @@ export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createServerClient()
+  const supabase = createSupabaseServerClient()
 
   const { id } = params
   if (!id) {
