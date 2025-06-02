@@ -118,9 +118,9 @@ export default function PostDetailPage() {
         {renderReadOnlyField('問い合わせ者名', formData.inquirerName)}
         {renderReadOnlySelect('性別', formData.inquirerGender, genderLabel)}
         {renderReadOnlyField('問い合わせ者連絡先', formData.inquirerPhone)}
-        {renderReadOnlySelect('問い合わせ者 続き柄', formData.inquirerRelationship, relationshipLabel)}
+        {renderReadOnlySelect('問い合わせ者 続柄', formData.inquirerRelationship, relationshipLabel)}
         {formData.inquirerRelationship === 'OTHER' &&
-          renderReadOnlyField('その他の続き柄', formData.inquirerRelationshipOther)}
+          renderReadOnlyField('その他の続柄', formData.inquirerRelationshipOther)}
         {renderReadOnlyField('備考', formData.remarks)}
 
         {/* 編集・戻るボタン */}

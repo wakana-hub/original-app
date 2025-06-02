@@ -117,6 +117,8 @@ export default function CreatePostPage() {
       ? dayjs(formData.endTime).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss')
       : null;
 
+     const updatedAtJST = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');   
+
     const res = await fetch('/api/lists', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -124,6 +126,7 @@ export default function CreatePostPage() {
         ...formData,
         startTime: startTimeJST,
         endTime: endTimeJST,
+        updatedAt: updatedAtJST,
       }),
     });
     

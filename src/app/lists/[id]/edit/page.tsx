@@ -218,7 +218,7 @@ export default function PostEditPage() {
         </TextField>
         {formData.inquirerRelationship === 'OTHER' && (
           <TextField
-            label="その他の続き柄"
+            label="その他の続柄"
             fullWidth
             margin="normal"
             value={formData.inquirerRelationshipOther || ''}
