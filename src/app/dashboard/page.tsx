@@ -20,22 +20,26 @@ import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import supabase from '../../utils/supabase/supabaseClient'
+
+dayjs.extend(isoWeek);
 
 export default function DashBoard() {
   const drawerWidth = 240;
   const navItems = [
-  { label: 'ホーム', path: 'dashboard' },
+  { label: 'ホーム', path: '/dashboard' },
   { label: '対応履歴一覧', path: '/lists' },
   { label: 'ユーザー設定', path: '/user' },
 ];
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null); // ユーザー名を追加
   const [loading, setLoading] = useState(true);
-   const [selectedDate] = useState<Dayjs | null>(dayjs()); //
+   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs()); 
    const [activeDates, setActiveDates] = useState<string[]>([]);
   const [data, setData] = useState<{ date: string; count: number }[]>([]); 
+
    
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -51,11 +55,12 @@ export default function DashBoard() {
  const handleDateChange = (value: Dayjs | Date | null) => {
   if (!value) return;
 
-  const date = dayjs(value); // Dayjs に変換
-  if (!date.isValid() || !isDateEnabled(date)) return;
+  const date = dayjs(value);  
+   if (!date.isValid() || !isDateEnabled(date)) return;
 
+  setSelectedDate(date);
   const isoDate = date.format('YYYY-MM-DD');
-  router.push(`/list?date=${isoDate}`);
+  router.push(`/lists?date=${isoDate}`);
 };
 
   const handleLogout = async () => {
@@ -79,24 +84,38 @@ export default function DashBoard() {
   };
 
    const fetchPostSummary = async () => {
+    const today = dayjs();
+    const startOfWeek = today.startOf('isoWeek');
+    const endOfWeek = today.endOf('isoWeek');
+
     const { data, error } = await supabase
       .from('post')
-      .select('startTime', { count: 'exact' });
+      .select('startTime')
+      .gte('startTime',startOfWeek.toISOString())
+      .lte('startTime',endOfWeek.toISOString());
 
     if (error || !data) return;
 
     const counts: Record<string, number> = {};
-    for (const post of data) {
-      const date = dayjs(post.startTime).format('YYYY-MM-DD');
-      counts[date] = (counts[date] || 0) + 1;
+
+    for (let i = 0; i < 7; i++) {
+      const date =  startOfWeek.add(i, 'day').format('YYYY-MM-DD');
+      counts[date] = 0;
     }
+
+     for (const post of data) {
+    const date = dayjs(post.startTime).format('YYYY-MM-DD');
+    if (counts[date] !== undefined) {
+      counts[date]++;
+    }
+  }
 
     const summary = Object.entries(counts)
       .map(([date, count]) => ({ date, count }))
-      .sort((a, b) => a.date.localeCompare(b.date));
 
     setData(summary);
-    setActiveDates(summary.map(item => item.date));
+    setActiveDates(summary.filter(item => item.count > 0).map(item => item.date));
+    console.log("有効日付:", summary.filter(item => item.count > 0).map(item => item.date));
   };
 
   useEffect(() => {
@@ -159,7 +178,8 @@ export default function DashBoard() {
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar position="fixed">
-        <Toolbar>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <IconButton
             color="inherit"
             edge="start"
@@ -168,6 +188,9 @@ export default function DashBoard() {
           >
             <MenuIcon />
           </IconButton>
+          </Box>
+
+           <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
           <Typography
             variant="h6"
             component="div"
@@ -175,9 +198,21 @@ export default function DashBoard() {
           >
             DashBoard
           </Typography>
+          </Box>
           {/* ユーザー名を表示 */}
-          {userName && <Typography color="inherit" sx={{ marginRight: 2 }}>ようこそ, {userName}さん</Typography>}
+           <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {userName && (
+            <Typography 
+            variant="body2"
+            color="inherit" sx={{
+            display: { xs: 'none', sm: 'block' },
+            mr: 2,
+            whiteSpace: 'nowrap'
+          }}>
+            ユーザ名： {userName}さん
+          </Typography>)}
           <Button color="inherit" onClick={handleLogout}>ログアウト</Button>
+          </Box>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -221,15 +256,14 @@ export default function DashBoard() {
       <Box
   sx={{
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection:{xs:'column',md:'row'},
+    justifyContent: 'center',
     gap: 4,
     mt: 4,
-    height: 400,
   }}
 >
   {/* カレンダー */}
-  <Box sx={{ flex: 1 }}>
+  <Box sx={{ flex: 1, width: { xs: '100%', md: '60%' } }}>
         <Typography variant="h6" gutterBottom>対応履歴カレンダー</Typography>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateCalendar
@@ -237,22 +271,19 @@ export default function DashBoard() {
             onChange={handleDateChange}
             shouldDisableDate={(date) => !isDateEnabled(date)}
             sx={{
-        display: 'flex', 
-        justifyContent: 'flex-start'  ,
-        marginLeft: 0, // 左側のマージンを無くす
-        width: '100%', // 幅を100%に設定
-        maxWidth: '600px', // 最大幅を設定
-        height: 'auto', // 高さも自動で調整
-        '& .MuiDayPicker-root': {
-          fontSize: '1.5rem', // 日付のフォントサイズを大きく
-        }
-        }}
+                width: '100%', // 幅を100%に設定
+                maxWidth: '600px', // 最大幅を設定
+                height: 'auto', // 高さも自動で調整
+                '& .MuiDayPicker-root': {
+                  fontSize: '1.5rem', // 日付のフォントサイズを大きく
+                }
+                }}
           />
         </LocalizationProvider>
       </Box>
-            <Box sx={{flex:1 }}>
-      <Typography variant="h6" gutterBottom>対応履歴の件数</Typography>
-      <ResponsiveContainer width="60%" height={300}>
+            <Box sx={{ flex: 1, width: { xs: '100%', md: '60%' }, height: 300 }}>
+      <Typography variant="h6" gutterBottom>対応履歴件数（月曜日～日曜日）</Typography>
+      <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="date" />

@@ -4,7 +4,7 @@ import {
   Box, Typography, 
   Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, TextField, Tabs, Tab, Autocomplete,
-  Button
+  Button,CircularProgress
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -196,7 +196,8 @@ const sortedPosts = [...posts].sort((a, b) => {
       : null;
 
   if (loading) {
-    return <Box sx={{ p: 5 }}><Typography>読み込み中...</Typography></Box>;
+    return <CircularProgress size={40} thickness={5} color="primary" />
+;
   }
 
   return (

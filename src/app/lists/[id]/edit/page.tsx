@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { TextField, MenuItem, Box, Button, Stack } from '@mui/material'
+import { TextField, MenuItem, Box, Button, Stack,CircularProgress } from '@mui/material'
 import Layout from '../../../../components/Layout'
 import {
   inquiryTypeLabel,
@@ -71,7 +71,7 @@ export default function PostEditPage() {
     fetchPost()
   }, [id, router])
 
-  if (loading || !formData) return <div>読み込み中...</div>
+  if (loading || !formData) return <CircularProgress size={40} thickness={5} color="primary" />
 
   const handleChange = (key: keyof Post, value: string) => {
     setFormData((prev) => prev ? { ...prev, [key]: value } : null)

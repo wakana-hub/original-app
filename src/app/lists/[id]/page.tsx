@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { TextField, MenuItem, Box, Button, Stack } from '@mui/material'
+import { TextField, MenuItem, Box, Button, Stack,CircularProgress } from '@mui/material'
 import Layout from '../../../components/Layout'
 import {
   inquiryTypeLabel,
@@ -62,7 +62,7 @@ export default function PostDetailPage() {
     fetchPost()
   }, [id, router])
 
-  if (!formData) return <div>読み込み中...</div>
+  if (!formData) return <CircularProgress size={40} thickness={5} color="primary" />
 
   const jstStartTime = dayjs
     .utc(formData.startTime)
