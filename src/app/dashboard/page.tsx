@@ -190,11 +190,11 @@ export default function DashBoard() {
           </IconButton>
           </Box>
 
-           <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
+           <Box sx={{ flexGrow: 1}}>
           <Typography
             variant="h6"
             component="div"
-            sx={{ flexGrow: 1 }}
+           sx={{ textAlign: 'left' }}
           >
             DashBoard
           </Typography>
@@ -203,7 +203,7 @@ export default function DashBoard() {
            <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {userName && (
             <Typography 
-            variant="body2"
+            variant="body1"
             color="inherit" sx={{
             display: { xs: 'none', sm: 'block' },
             mr: 2,
@@ -211,7 +211,7 @@ export default function DashBoard() {
           }}>
             ユーザ名： {userName}さん
           </Typography>)}
-          <Button color="inherit" onClick={handleLogout}>ログアウト</Button>
+          <Button color="inherit"onClick={handleLogout}>ログアウト</Button>
           </Box>
         </Toolbar>
       </AppBar>
@@ -282,7 +282,7 @@ export default function DashBoard() {
         </LocalizationProvider>
       </Box>
             <Box sx={{ flex: 1, width: { xs: '100%', md: '60%' }, height: 300 }}>
-      <Typography variant="h6" gutterBottom>対応履歴件数（月曜日～日曜日）</Typography>
+      <Typography variant="h6" gutterBottom>対応履歴件数（月曜～日曜日）</Typography>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
