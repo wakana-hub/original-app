@@ -4,6 +4,7 @@ import { Box, Button, Container, Paper, TextField, Typography } from "@mui/mater
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import supabase from "../../utils/supabase/supabaseClient"
+import Header from "../../components/Header";
 
 export default function SigninPage(){
     const[authId,setAuthId]=useState("");
@@ -51,6 +52,8 @@ export default function SigninPage(){
     }
 
     return(
+            <>
+            <Header/>    
             <Container maxWidth="sm" >
             <Paper elevation={3} sx={{padding:4, mt:5}}>
             <Typography 
@@ -105,5 +108,6 @@ export default function SigninPage(){
             </Box>
         </Paper>
         </Container>
+        </>
     )
 }

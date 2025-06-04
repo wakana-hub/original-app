@@ -1,4 +1,5 @@
 'use client'
+import Header from "../../components/Header";
 import { Box, Button, Container, Paper, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react"
@@ -61,6 +62,7 @@ export default function SignupPage () {
 
     return (
         <>
+        <Header/>
         <Container maxWidth="sm" >
         <Paper elevation={3} sx={{padding:4, mt:5}}>
             <Typography 

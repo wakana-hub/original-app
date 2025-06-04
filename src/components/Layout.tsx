@@ -3,7 +3,7 @@
 import { useEffect, useState, ReactNode } from 'react';
 import {
   AppBar, Box, CssBaseline, Divider, Drawer, IconButton, List, ListItem, ListItemButton,
-  ListItemText, Toolbar, Typography, Button
+  ListItemText, Toolbar, Typography, Button,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useRouter } from 'next/navigation';
@@ -13,6 +13,8 @@ type Props = {
   children: ReactNode;
   title?: string;
 };
+
+const drawerWidth = 240;
 
 export default function Layout({ children, title = 'ダッシュボード' }: Props) {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -84,30 +86,55 @@ export default function Layout({ children, title = 'ダッシュボード' }: Pr
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed">
-        <Toolbar>
-          <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>{title}</Typography>
-          {userName && (
-            <Typography color="inherit" sx={{ marginRight: 2 }}>
-              ようこそ, {userName}さん
+
+      {/* AppBar */}
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <Toolbar sx={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" noWrap>
+              {title}
             </Typography>
-          )}
-          <Button color="inherit" onClick={handleLogout}>ログアウト</Button>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: { xs: 1, sm: 0 } }}>
+            {userName && (
+              <Typography color="inherit" sx={{ marginRight: 2 }}>
+                ユーザー名：{userName}さん
+              </Typography>
+            )}
+            <Button color="inherit" onClick={handleLogout}>ログアウト</Button>
+          </Box>
         </Toolbar>
       </AppBar>
+
+      {/* 共通 Drawer（PC/モバイル） */}
       <Drawer
         variant="temporary"
         open={drawerOpen}
         onClose={handleDrawerToggle}
         ModalProps={{ keepMounted: true }}
-        sx={{ '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 } }}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+          },
+        }}
       >
         {drawer}
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+
+      {/* Main Content */}
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, p: 3 }}
+      >
         <Toolbar />
         {children}
       </Box>
