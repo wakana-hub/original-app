@@ -209,7 +209,7 @@ export default function DashBoard() {
             mr: 2,
             whiteSpace: 'nowrap'
           }}>
-            ユーザ名： {userName}さん
+            ログインUser： {userName}
           </Typography>)}
           <Button color="inherit"onClick={handleLogout}>ログアウト</Button>
           </Box>

@@ -24,6 +24,9 @@ import dayjs from "dayjs"
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import AddIcon from '@mui/icons-material/Add';
+import { useSearchParams } from 'next/navigation';
+import supabase from '../../utils/supabase/supabaseClient'
+
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -37,7 +40,9 @@ type Post = {
   inquiryType: string;
   category: string;
   message: string;
-  responder: string | null; // ← user.name をここに格納
+  responder: string | null; 
+  startTime: string;
+
 };
 
 type ApiPost = {
@@ -100,6 +105,7 @@ export default function ResponseListPage() {
           category: post.category,
           message: post.message,
           responder: post.user?.name || null,
+          startTime:post.startTime.replace('T', ' '),
         }));
         setPosts(normalized);
       } catch (e) {
@@ -135,13 +141,72 @@ const sortedPosts = [...posts].sort((a, b) => {
   return a.id.localeCompare(b.id);
 });
 
+const searchParams = useSearchParams();
+const dateParam = searchParams.get('date');
+
+useEffect(() => {
+    if (!dateParam) {
+      setPosts([]);
+      setLoading(false);
+      return;
+    }
+
+    const fetchPostsByDate = async () => {
+      setLoading(true);
+      const startDate = dayjs(dateParam).startOf('day').toISOString();
+      const endDate = dayjs(dateParam).endOf('day').toISOString();
+
+      const { data, error } = await supabase
+        .from('post')
+        .select('*')
+        .gte('startTime', startDate)
+        .lte('startTime', endDate);
+
+      if (error) {
+        console.error(error);
+        setPosts([]);
+      } else {
+        setPosts(data ?? []);
+      }
+      setLoading(false);
+    };
+
+  fetchPostsByDate();
+
+  const month = dayjs(dateParam).format('MM');
+  const day = dayjs(dateParam).format('DD');
+  setFilters((prev) => ({
+    ...prev,
+    dateMonth: month,
+    dateDay: day,
+  }));
+}, [dateParam]);
+
+useEffect(() => {
+  const urlMonth = searchParams.get('month');
+  const urlDay = searchParams.get('day');
+  if (urlMonth && urlDay) {
+    setActiveTab('date');
+    setFilters((prev) => ({
+      ...prev,
+      dateMonth: urlMonth,
+      dateDay: urlDay,
+    }));
+  }
+}, [searchParams]);
+
+
   const filteredData =sortedPosts.filter((row) => {
-  const dateObj = dayjs(row.date); 
+  console.log('row.date:', row.date);
+
+  const dateObj = dayjs.utc(row.date).tz('Asia/Tokyo');
+
+  
   const month = dateObj.format('MM');
   const day = dateObj.format('DD');
 
   return (
-    (filters.number === '' || row.id.includes(filters.number)) &&
+    (filters.number === '' || String(row.id).includes(filters.number)) &&
     (filters.dateMonth === '' || month === filters.dateMonth) &&
     (filters.dateDay === '' || day === filters.dateDay) &&
     (filters.responder === '' || (row.responder ?? '').includes(filters.responder)) &&
@@ -180,7 +245,11 @@ const sortedPosts = [...posts].sort((a, b) => {
   };
 
   const todayDate = getTodayDate();
-  const todayDataCount = filteredData.filter((row) => row.date.includes(todayDate)).length;
+  const todayDataCount = posts.filter((row) => {
+  if (!row?.startTime) return false;
+  const rowDate = row.startTime.slice(0, 10);
+  return rowDate === todayDate;
+}).length;
 
   const handleDelete = async (id: string) => {
   if (!confirm('本当に削除しますか？')) return;
