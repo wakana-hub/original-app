@@ -3,8 +3,15 @@
 import {
   Box, Typography, 
   Table, TableBody, TableCell, TableContainer, TableHead,
-  TableRow, Paper, TextField, Tabs, Tab, Autocomplete,
-  Button,CircularProgress
+  TableRow, Paper, TextField,  Autocomplete,
+  Button,CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  Stack,
+  Tooltip,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -16,6 +23,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from "dayjs"
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import AddIcon from '@mui/icons-material/Add';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -66,9 +74,9 @@ export default function ResponseListPage() {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newTab: FilterKey) => {
-    setActiveTab(newTab);
-  };
+  const handleSelectChange = (event: SelectChangeEvent<string>) => {
+  setActiveTab(event.target.value as FilterKey);
+};
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -200,11 +208,18 @@ const sortedPosts = [...posts].sort((a, b) => {
 ;
   }
 
+  
+
   return (
       <Layout title="対応履歴一覧">
       <Box component="main" sx={{ flexGrow: 1}}>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
-          <Button variant="contained" color="primary" sx={{
+        <Box 
+        display="flex" flexDirection="column" alignItems="flex-start" gap={1} mb={2}>
+          <Button 
+          variant="contained" 
+          startIcon={<AddIcon />}
+          color="primary" 
+          sx={{
             mt: 3,
             alignSelf: 'flex-start', 
             backgroundColor: '#4caf50', 
@@ -216,28 +231,56 @@ const sortedPosts = [...posts].sort((a, b) => {
               backgroundColor: '#43a047', // ホバー色調整
             },
           }}onClick={() => router.push('/create')}>新規作成</Button>
-          <Box sx={{ border: '1px solid #ccc', borderRadius: 1, padding: 1.5, ml: 3 ,display: 'flex',justifyContent: 'center' ,alignItems: 'center',}}>
-            <Typography variant="h6"sx={{ mb: 0 }}>今日の件数: {todayDataCount}件</Typography>
+          <Box sx={{ 
+            border: '1px solid #ccc',
+            borderRadius: 1, 
+            padding: 1.5, 
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap:"wrap" ,
+            gap:2,
+            }}>
+            <Typography variant="h6"sx={{ m: 0 }}>今日の件数: {todayDataCount}件</Typography>
           </Box>
         </Box>
 
-        <Box sx={{ border: '1px solid #ccc', borderRadius: 1, p: 2, mb: 2 }}>
-          <Typography variant="h6" gutterBottom>フィルター</Typography>
-          <Tabs value={activeTab} onChange={handleTabChange}>
-            <Tab label="登録番号" value="number" />
-            <Tab label="対応開始日" value="date" />
-            <Tab label="対応者" value="responder" />
-            <Tab label="ステータス" value="status" />
-            <Tab label="受架電" value="inquiryType" />
-            <Tab label="カテゴリー" value="category" />
-          </Tabs>
+        <Box sx={{ 
+          border: '1px solid #ccc', 
+          borderRadius: 1, 
+          p: 2, 
+          mb: 2,
+           width: {
+      xs: '100%',    // スマホでは全幅
+      sm: 'auto',    // タブレット以上では内容に合わせる
+    },
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          }}>
+          <Stack spacing={2} > 
+          <FormControl fullWidth size="small">
+          <InputLabel id="filter-label">フィルター項目</InputLabel>
+            <Select
+              labelId="filter-label"
+              value={activeTab}
+              label="フィルター項目"
+              onChange={handleSelectChange}
+            >
+              <MenuItem value="number">登録番号</MenuItem>
+              <MenuItem value="date">対応開始日</MenuItem>
+              <MenuItem value="responder">対応者</MenuItem>
+              <MenuItem value="status">ステータス</MenuItem>
+              <MenuItem value="inquiryType">受架電</MenuItem>
+              <MenuItem value="category">カテゴリー</MenuItem>
+            </Select>
+          </FormControl>
           {activeTab === 'number' && (
             <Autocomplete
               freeSolo
               options={getUniqueOptions('id')}
               inputValue={filters.number}
               onInputChange={(_, value) => handleFilterChange('number', value)}
-              renderInput={(params) => <TextField {...params} label="登録番号" size="small" fullWidth sx={{ mt: 2, mb: 1 }} />}
+              renderInput={(params) => <TextField {...params} label="登録番号" size="small" fullWidth sx={{ mt: 2, mb: 1 ,maxWidth: '100%'}} />}
             />
           )}
             {activeTab === 'date' && (
@@ -302,7 +345,8 @@ const sortedPosts = [...posts].sort((a, b) => {
           )}
           <Button
             variant="outlined"
-            sx={{ mt: 2, ml: 2 }}
+            color="secondary"
+            sx={{ mt: 2}}
             onClick={() =>
               setFilters({
                 number: '',
@@ -318,12 +362,13 @@ const sortedPosts = [...posts].sort((a, b) => {
           >
             フィルターリセット
           </Button> 
+          </Stack> 
         </Box>
 
 
         <Typography variant="h5" gutterBottom>対応履歴一覧</Typography>
-        <TableContainer component={Paper}>
-          <Table>
+        <TableContainer component={Paper}sx={{ width: '100%', overflowX: 'auto' }}>
+          <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>
                 <TableCell>登録番号</TableCell>
@@ -333,7 +378,7 @@ const sortedPosts = [...posts].sort((a, b) => {
                 <TableCell>受架電</TableCell>
                 <TableCell>カテゴリー</TableCell>
                 <TableCell>入電内容</TableCell>
-                <TableCell></TableCell>
+                <TableCell>処理</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -344,8 +389,12 @@ const sortedPosts = [...posts].sort((a, b) => {
                   <TableCell>{row.responder ?? '-'}</TableCell>
                   <TableCell>{postStatusLabel[row.status  as keyof typeof postStatusLabel] ?? row.status}</TableCell>
                   <TableCell>{inquiryTypeLabel[row.inquiryType as keyof typeof inquiryTypeLabel] ?? row.inquiryType}</TableCell>
-                  <TableCell>{categoryLabel[row.category as keyof typeof categoryLabel] ?? row.category}</TableCell>
-                  <TableCell>{row.message.length > 15 ? `${row.message.slice(0, 15)}...` : row.message}</TableCell>
+                   <TableCell>{categoryLabel[row.category as keyof typeof categoryLabel] ?? row.category}</TableCell>
+                  <TableCell>
+                     <Tooltip title={row.message}>
+                     <span>{row.message.length > 15 ? `${row.message.slice(0, 15)}...` : row.message}</span>
+                    </Tooltip>
+                    </TableCell>
                   <TableCell>
                     <Button 
                     size="small" 
