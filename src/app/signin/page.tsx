@@ -55,7 +55,7 @@ export default function SigninPage(){
             <>
             <Header/>    
             <Container maxWidth="sm" >
-            <Paper elevation={3} sx={{padding:4, mt:5}}>
+            <Paper elevation={3} sx={{padding:4, my:5}}>
             <Typography 
             variant="h4"
             gutterBottom

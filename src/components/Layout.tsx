@@ -84,7 +84,7 @@ export default function Layout({ children, title = 'ダッシュボード' }: Pr
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ minHeight: '100vh', overflow: 'hidden' }}>
       <CssBaseline />
 
       {/* AppBar */}
@@ -121,10 +121,11 @@ export default function Layout({ children, title = 'ダッシュボード' }: Pr
         onClose={handleDrawerToggle}
         ModalProps={{ keepMounted: true }}
         sx={{
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-          },
+        zIndex: (theme) => theme.zIndex.appBar - 1,
+        '& .MuiDrawer-paper': {
+          width: drawerWidth,
+          boxSizing: 'border-box',
+        },
         }}
       >
         {drawer}
@@ -133,7 +134,7 @@ export default function Layout({ children, title = 'ダッシュボード' }: Pr
       {/* Main Content */}
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3 }}
+        sx={{ p: 3 }}
       >
         <Toolbar />
         {children}
