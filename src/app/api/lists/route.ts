@@ -1,17 +1,15 @@
 // src/app/api/lists/route.ts
-import { NextResponse } from 'next/server';
-import supabase from '../../../utils/supabase/supabaseServerClient'
-import { PrismaClient,InquiryType } from '@prisma/client'
-import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
-import timezone from 'dayjs/plugin/timezone'
-dayjs.extend(utc)
-dayjs.extend(timezone)
+import { NextResponse } from "next/server";
+import supabase from "../../../utils/supabase/supabaseServerClient";
+import { PrismaClient, InquiryType } from "@prisma/client";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export async function GET() {
-  const { data, error } = await supabase
-    .from('post')
-    .select(`
+  const { data, error } = await supabase.from("post").select(`
       id,
       startTime,
       status,
@@ -30,11 +28,11 @@ export async function GET() {
   return NextResponse.json(data);
 }
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
+    const body = await request.json();
 
     const {
       startTime,
@@ -49,22 +47,31 @@ export async function POST(request: Request) {
       inquirerRelationship,
       inquirerRelationshipOther,
       remarks,
-      auth_id, 
-      updated_at, 
-    } = body
+      auth_id,
+      updated_at,
+    } = body;
 
     if (!auth_id) {
-      return NextResponse.json({ success: false, error: 'ユーザーIDがありません' }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: "ユーザーIDがありません" },
+        { status: 400 }
+      );
     }
 
-      if (!Object.values(InquiryType).includes(inquiryType)) {
-      return NextResponse.json({ success: false, error: 'inquiryTypeの値が不正です' }, { status: 400 })
+    if (!Object.values(InquiryType).includes(inquiryType)) {
+      return NextResponse.json(
+        { success: false, error: "inquiryTypeの値が不正です" },
+        { status: 400 }
+      );
     }
 
-    const user = await prisma.user.findUnique({ where: { auth_id} })
+    const user = await prisma.user.findUnique({ where: { auth_id } });
 
     if (!user) {
-      return NextResponse.json({ success: false, error: '該当するユーザーが存在しません' }, { status: 404 })
+      return NextResponse.json(
+        { success: false, error: "該当するユーザーが存在しません" },
+        { status: 404 }
+      );
     }
 
     // post 作成（userと紐付け + user.name も含めて返す）
@@ -83,7 +90,7 @@ export async function POST(request: Request) {
         inquirerRelationshipOther: inquirerRelationshipOther || null,
         remarks: remarks || null,
         auth_id,
-        updatedAt: updated_at ? new Date(updated_at) : new Date(), 
+        updatedAt: null,
         user: {
           connect: { id: user.id },
         },
@@ -96,11 +103,14 @@ export async function POST(request: Request) {
           },
         },
       },
-    })
+    });
 
-    return NextResponse.json({ success: true, data: newPost }, { status: 201 })
+    return NextResponse.json({ success: true, data: newPost }, { status: 201 });
   } catch (error) {
-    console.error('[POST ERROR]', error)
-    return NextResponse.json({ success: false, error: '登録に失敗しました' }, { status: 500 })
+    console.error("[POST ERROR]", error);
+    return NextResponse.json(
+      { success: false, error: "登録に失敗しました" },
+      { status: 500 }
+    );
   }
 }
