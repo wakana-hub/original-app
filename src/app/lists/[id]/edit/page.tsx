@@ -107,7 +107,7 @@ export default function PostEditPage() {
 
   return (
     <Layout title="投稿編集">
-      <Box sx={{ p: 4, maxWidth: 700 }}>
+      <Box sx={{ p: 4}}>
         <TextField
           label="対応開始日時"
           type="datetime-local"

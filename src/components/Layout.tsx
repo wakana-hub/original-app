@@ -106,7 +106,7 @@ export default function Layout({ children, title = 'ダッシュボード' }: Pr
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: { xs: 1, sm: 0 } }}>
             {userName && (
               <Typography color="inherit" sx={{ marginRight: 2 }}>
-                ユーザー名：{userName}さん
+                ログインUser：{userName}
               </Typography>
             )}
             <Button color="inherit" onClick={handleLogout}>ログアウト</Button>
