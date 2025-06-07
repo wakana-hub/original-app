@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, Container, Paper, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Container, Paper, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import supabase from "../../utils/supabase/supabaseClient"
@@ -84,10 +84,10 @@ export default function SigninPage(){
                 required
                 />
                 {error && (
-                <Typography color="error" sx={{ mt: 2 }}>
-                {error} {/* エラーメッセージを表示 */}
-                 </Typography> 
-                 )}
+                  <Alert severity="error" sx={{ mt: 2 }}>
+                    {error}
+                  </Alert>
+                )}
                 <Button
                 type="submit"
                 variant="contained"

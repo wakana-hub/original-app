@@ -1,9 +1,11 @@
 'use client'
 import Header from "../../components/Header";
-import { Box, Button, Container, Paper, TextField, Typography } from "@mui/material";
+import {Box, Button, Container, Paper, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react"
 import { z } from "zod";
+import { Alert } from "@mui/material";
+
 
 const SignupSchema = z.object({
     name: z.string().min(1, "名前は必須です"),
@@ -20,6 +22,9 @@ export default function SignupPage () {
     const[email,setEmail]=useState("");
     const[password,setPassword]=useState("");
     const[authId,setAuthId]=useState("")
+    const [messages, setMessages] = useState<{ type: 'success' | 'error', text: string | string[] } | null>(null);
+
+
 
     const router = useRouter();
 
@@ -35,9 +40,12 @@ export default function SignupPage () {
         
           const result = SignupSchema.safeParse(formData);
           if (!result.success) {
-            alert(result.error.errors[0].message); // 最初のエラーを表示
+            const errorMessages = result.error.errors.map(err => err.message);
+            setMessages({ type: 'error', text: errorMessages });
             return;
           }
+
+          console.log(messages)
 
         const response =await fetch('/api/auth/signup',{
             method:'POST',
@@ -46,18 +54,20 @@ export default function SignupPage () {
             },
             body:JSON.stringify(formData) 
         });
+
         console.log(formData)
         console.log({ name, email, password, authId });
 
         const data = await response.json();
 
         if(response.ok){
-            alert('サインアップ成功');
-            router.push('/signin')
-        }else{
-            alert(`エラー:${data.error}`)
-        }
-            
+           setMessages({ type: 'success', text: '新規登録が完了しました。3秒後にログイン画面へ移動します。' });
+                setTimeout(() => {
+                    router.push('/signin');
+                }, 3000);
+                } else {
+                setMessages({ type: 'error', text: data.error ?? "登録に失敗しました"});
+                }
         }
 
     return (
@@ -107,6 +117,19 @@ export default function SignupPage () {
                 onChange={(e) => setAuthId(e.target.value)}
                 required
                 />
+                {messages && (
+                <Alert severity={messages.type} sx={{ mt: 2, whiteSpace: 'pre-line' }}>
+                    {Array.isArray(messages.text) ? (
+                    <ul style={{ margin: 0, paddingLeft: '1.5em' }}>
+                        {messages.text.map((msg, i) => (
+                        <li key={i}>{msg}</li>
+                        ))}
+                    </ul>
+                    ) : (
+                    messages.text
+                    )}
+                </Alert>
+                )} 
                 <Button
                 type="submit"
                 variant="contained"
