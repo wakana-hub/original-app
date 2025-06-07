@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Typography, CircularProgress, Button, Stack, TextField, Paper } from '@mui/material';
+import { Box, Typography, CircularProgress, Button, Stack, TextField, Paper, Alert } from '@mui/material';
 import supabase from '@/utils/supabase/supabaseClient';
 import { Database } from '../../../types/supabase';
 import Layout from '@/components/Layout';
@@ -16,6 +16,9 @@ export default function UserEditPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const router = useRouter();
+  const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+
+  console.log(email)
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -57,22 +60,29 @@ export default function UserEditPage() {
 
   const handleSave = async () => {
     if (!user) return;
+
+    if (!name.trim()) {
+    setMessage({ type: 'error', text: 'ユーザー名を入力してください。' });
+    return;
+  }
     setSaving(true);
+    setMessage(null); 
 
     const { error } = await supabase
       .from('user')
       .update({
         name,
-        email,
       })
       .eq('id', user.id);
 
-    if (error) {
-      alert('更新に失敗しました: ' + error.message);
-    } else {
-      alert('ユーザー情報を更新しました');
-      router.push('/user');
-    }
+        if (error) {
+        setMessage({ type: 'error', text: '更新に失敗しました: ' + error.message });
+      } else {
+        setMessage({ type: 'success', text: 'ユーザー情報を更新しました' });
+        setTimeout(() => {
+          router.push('/user');
+        }, 1500); 
+      }
 
     setSaving(false);
   };
@@ -106,6 +116,12 @@ export default function UserEditPage() {
           </Typography>
           <Typography variant="body1">{user.auth_id || '未設定'}</Typography>
         </Paper>
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Typography variant="subtitle2" color="text.secondary">
+            メールアドレス（編集不可）
+          </Typography>
+          <Typography variant="body1">{user.email || '未設定'}</Typography>
+        </Paper>
 
         <TextField
           label="ユーザー名"
@@ -115,16 +131,11 @@ export default function UserEditPage() {
           onChange={(e) => setName(e.target.value)}
           required
         />
-        <TextField
-          label="メールアドレス"
-          fullWidth
-          margin="normal"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          type="email"
-          required
-        />
-
+        {message && (
+          <Alert severity={message.type} sx={{ mt: 2 }}>
+            {message.text}
+          </Alert>
+        )}
         <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
           <Button variant="contained" color="primary" onClick={handleSave} disabled={saving}>
             {saving ? '保存中...' : '保存'}

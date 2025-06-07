@@ -14,6 +14,8 @@ import {
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import { Alert } from '@mui/material';
+
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -44,6 +46,7 @@ export default function PostEditPage() {
   const [formData, setFormData] = useState<Post | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -79,6 +82,21 @@ export default function PostEditPage() {
 
   const handleSubmit = async () => {
     setSaving(true)
+    setMessage(null)
+
+     if (
+    !formData?.startTime?.trim() ||
+    !formData?.endTime?.trim() ||
+    !formData?.status?.trim() ||
+    !formData?.inquiryType?.trim() ||
+    !formData?.category?.trim() ||
+    !formData?.message?.trim()
+  ) {
+    setMessage({ type: 'error', text: '対応開始日時、対応終了日時、ステータス、受架電、カテゴリー、入電内容は必須です。' })
+    setSaving(false)
+    return
+  }
+
     try {
       const postDataWithoutUser = { ...formData }
       delete postDataWithoutUser.user
@@ -94,10 +112,15 @@ export default function PostEditPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postDataWithoutUser),
       })
-      if (!res.ok) throw new Error('更新に失敗しました')
 
-      alert('更新しました')
+      const data = await res.json()
+
+      if (!res.ok) throw new Error(data.error || '更新に失敗しました')
+
+      setMessage({ type: 'success', text: data.message || '更新しました' })
+      setTimeout(() => {
       router.push(`/lists/${id}`)
+    }, 3000)
     } catch (e) {
       alert((e as Error).message)
     } finally {
@@ -234,6 +257,11 @@ export default function PostEditPage() {
           value={formData.remarks}
           onChange={(e) => handleChange('remarks', e.target.value)}
         />
+        {message && (
+          <Alert severity={message.type} sx={{ mt: 3, whiteSpace: 'pre-line' }}>
+            {message.text}
+          </Alert>
+        )}
         <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
           <Button variant="contained" color="primary" onClick={handleSubmit} disabled={saving}>
             {saving ? '保存中...' : '保存'}
