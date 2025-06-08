@@ -15,12 +15,14 @@ import {
   categoryLabel,
   postStatusLabel,
 } from '../enums'
+import { Alert } from '@mui/material'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
 export default function CreatePostPage() {
   const router = useRouter()
+  const [errorMessages, setErrorMessages] = useState<string[]>([])
 
   const [formData, setFormData] = useState({
     startTime: dayjs().tz('Asia/Tokyo').format('YYYY-MM-DDTHH:mm'),
@@ -112,12 +114,31 @@ export default function CreatePostPage() {
     return;
   }
 
+   const errors: string[] = [];
+
+   if (!formData.startTime) errors.push('対応開始日時は必須です。');
+  if (!formData.endTime) errors.push('対応終了日時は必須です。');
+  if (!formData.status) errors.push('ステータスは必須です。');
+  if (!formData.inquiryType) errors.push('受架電は必須です。');
+  if (!formData.category) errors.push('カテゴリーは必須です。');
+  if (!formData.message) errors.push('入電内容は必須です。');
+
+  if (errors.length > 0) {
+    setErrorMessages(errors);
+    return;
+  }
+
+   if (errors.length > 0) {
+    setErrorMessages(errors);
+    return;
+  }
+
+  setErrorMessages([]); 
+
    const startTimeJST = dayjs(formData.startTime).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');
     const endTimeJST = formData.endTime
       ? dayjs(formData.endTime).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss')
       : null;
-
-     const updatedAtJST = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');   
 
     const res = await fetch('/api/lists', {
       method: 'POST',
@@ -126,7 +147,6 @@ export default function CreatePostPage() {
         ...formData,
         startTime: startTimeJST,
         endTime: endTimeJST,
-        updatedAt: updatedAtJST,
       }),
     });
     
@@ -229,6 +249,15 @@ export default function CreatePostPage() {
           value={formData.remarks}
           onChange={handleChange}
         />
+       {errorMessages.length > 0 && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
+              {errorMessages.map((msg, idx) => (
+                <li key={idx}>{msg}</li>
+              ))}
+            </ul>
+          </Alert>
+        )}
         <Button variant="contained" onClick={handleSubmit} sx={{ mt: 2 }}>
           登録
         </Button>

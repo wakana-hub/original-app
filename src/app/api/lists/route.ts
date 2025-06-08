@@ -48,7 +48,6 @@ export async function POST(request: Request) {
       inquirerRelationshipOther,
       remarks,
       auth_id,
-      updated_at,
     } = body;
 
     if (!auth_id) {
@@ -90,7 +89,6 @@ export async function POST(request: Request) {
         inquirerRelationshipOther: inquirerRelationshipOther || null,
         remarks: remarks || null,
         auth_id,
-        updatedAt: null,
         user: {
           connect: { id: user.id },
         },
