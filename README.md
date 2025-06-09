@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📞アプリ概要:コールセンター用日報管理アプリ
 
-## Getting Started
+## ■コンセプト
+  大人数のオペレーターが所属するコールセンター業務において、日々の対応履歴をリアルタイムかつ一元的に管理できるアプリ。Excelでの個別管理による非効率や手間を解消し、業務の見える化と効率化を実現。
 
-First, run the development server:
+## ■ターゲット
+ + ユーザー属性
+   + オペレーター（電話対応者）
+   + 管理者　（オペレーターの対応状況を把握・管理）
+ + ユーザーの業務環境
+   + 多数のオペレーターが所属するチーム制の職場
+   + 現在はオペレーター各自がExcelで対応履歴を管理し、日報を個別に提出
+   + ファイル破損・集計作業の負担・リアルタイムでの共有不可など、多くの課題を抱えている
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ■ユーザーの課題とニーズ
+| 課題 | 解決策 |
+|------|--------|
+| 📂 各自のExcelで履歴を管理し、確認に時間がかかる | ✅ アプリ上で対応履歴をリアルタイム共有・検索可能に |
+| 🧾 管理者が全員分のExcelを手動で集計 | ✅ 一元管理により自動で集計可能。件数や状況も即時把握 |
+| ☎ 電話対応しながらの入力が手間 | ✅ シンプルで直感的な入力フォームでスムーズに記録可能 |
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 📊ダッシュボード（対応履歴の登録のある日付表示/ログイン週（月～日）の対応件数グラフ）
+スクショ
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🧾対応履歴一覧（新規作成ページ・対応履詳細ページ・対応履歴編集ページへの遷移/対応履歴の削除）
+スクショ
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 📝新規作成ページ
+スクショ
 
-## Learn More
+# 【アプリリリースURL」
 
-To learn more about Next.js, take a look at the following resources:
+## ■URL
+URL
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ■デモアカウント
+ テスト用ID ： staff001  
+ テスト用パスワード :  testtest1
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# 【アプリ機能一覧】
+| 機能カテゴリ       | 機能名                         | 概要・説明                                                                 |
+|--------------------|----------------------------------|------------------------------------------------------------------------------|
+| ダッシュボード     | カレンダー表示・日別件数グラフ（月～日） | カレンダー上で対応日を表示し、クリックで該当日の履歴に遷移・             |
+| 対応履歴の記録     | 対応履歴の新規登録              | 電話対応中に簡単に内容を記録できるフォーム機能                             |
+| 対応履歴の管理     | 対応履歴の一覧・検索・絞り込み | 日付・担当者・ステータスなど複数条件でフィルタリング可能                   |
+| 対応履歴の詳細     | 対応履歴の詳細表示              | 各履歴の詳細内容を確認できる専用ページ                                     |                    |
+| ユーザー管理       | ログイン・ログアウト             | オペレーター・管理者ごとにアカウント管理                                  |
+| ステータス管理     | ステータス切り替え（未対応など） | 各対応履歴に対し、進捗状態（例：未対応・対応中・完了）を設定               |
+| データ一元化       | Excel管理の代替                  | 全履歴をリアルタイムにWeb上で管理し、管理者の集計業務を不要にする           |
 
-## Deploy on Vercel
+# 【利用するフレームワーク/ライブラリ】
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🌐 フレームワーク / 開発環境
+ + Next.js（v14.2.28）
+ + React
+ + TypeScript
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🎨 UI / スタイリング
+ + Material UI (MUI)
+ + Tailwind CSS**
+
+### 📅 日付ライブラリ
+ + dayjs
+ + date-fns + @date-io/date-fns
+
+### 🔐 認証 / バックエンド
+ + Supabase
+ + Prisma
+ + bcrypt / bcryptjs
+
+### 🎯バリデーション
+ + zod
+
+### 📊 グラフ・カレンダー
+ +  recharts
+ +  react-calendar
+ 
+
+
+
+
+
