@@ -23,8 +23,12 @@ import dayjs, { Dayjs } from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import supabase from '../../utils/supabase/supabaseClient'
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
 dayjs.extend(isoWeek);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export default function DashBoard() {
   const drawerWidth = 240;
@@ -84,7 +88,7 @@ export default function DashBoard() {
   };
 
    const fetchPostSummary = async () => {
-    const today = dayjs();
+    const today = dayjs().tz('Asia/Tokyo');
     const startOfWeek = today.startOf('isoWeek');
     const endOfWeek = today.endOf('isoWeek');
 
@@ -104,7 +108,7 @@ export default function DashBoard() {
     }
 
      for (const post of data) {
-    const date = dayjs(post.startTime).format('YYYY-MM-DD');
+    const date = dayjs.utc(post.startTime).tz('Asia/Tokyo').format('YYYY-MM-DD');
     if (counts[date] !== undefined) {
       counts[date]++;
     }

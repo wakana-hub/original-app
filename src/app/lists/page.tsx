@@ -247,9 +247,11 @@ useEffect(() => {
   const todayDate = getTodayDate();
   const todayDataCount = posts.filter((row) => {
   if (!row?.startTime) return false;
-  const rowDate = row.startTime.slice(0, 10);
-  return rowDate === todayDate;
-}).length;
+  const jpTime = dayjs.utc(row.startTime).tz('Asia/Tokyo');
+  const rowDate = jpTime.format('YYYY-MM-DD');
+    console.log('rowDate:', rowDate);
+    return rowDate === todayDate;
+  }).length;
 
   const handleDelete = async (id: string) => {
   if (!confirm('本当に削除しますか？')) return;
