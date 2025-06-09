@@ -89,6 +89,7 @@ export async function POST(request: Request) {
         inquirerRelationshipOther: inquirerRelationshipOther || null,
         remarks: remarks || null,
         auth_id,
+        updatedAt: null,
         user: {
           connect: { id: user.id },
         },
