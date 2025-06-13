@@ -20,13 +20,16 @@
 | ☎ 電話対応しながらの入力が手間 | ✅ シンプルで直感的な入力フォームでスムーズに記録可能 |
 
 ### 📊ダッシュボード（対応履歴の登録のある日付表示/ログイン週（月～日）の対応件数グラフ）
-スクショ
+![Image](https://github.com/user-attachments/assets/4047d89c-40b6-479a-9de7-e3b031ac4b26)
 
-### 🧾対応履歴一覧（新規作成ページ・対応履詳細ページ・対応履歴編集ページへの遷移/対応履歴の削除）
-スクショ
+### 🧾対応履歴一覧（新規作成ページ・対応履歴詳細ページ・対応履歴編集ページへの遷移/対応履歴の削除）
+![Image](https://github.com/user-attachments/assets/436876dc-cd83-425e-8c34-fca5034cf13d)
 
 ### 📝新規作成ページ
-スクショ
+![Image](https://github.com/user-attachments/assets/d54c7961-5929-4f8e-ab2b-a114b534aa2d)
+
+### 🔖対応履歴詳細ページ
+![Image](https://github.com/user-attachments/assets/edb45471-8675-47ad-8371-54773bf5818c)
 
 # 【アプリリリースURL」
 
