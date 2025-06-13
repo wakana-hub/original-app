@@ -135,21 +135,21 @@ export default function CreatePostPage() {
 
   setErrorMessages([]); 
 
-   const startTimeJST = dayjs(formData.startTime).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');
-    const endTimeJST = formData.endTime
-      ? dayjs(formData.endTime).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss')
-      : null;
+   const startTimeUTC = dayjs.tz(formData.startTime, 'Asia/Tokyo').utc().toISOString();
+const endTimeUTC = formData.endTime
+  ? dayjs.tz(formData.endTime, 'Asia/Tokyo').utc().toISOString()
+  : null;
 
     const res = await fetch('/api/lists', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...formData,
-        startTime: startTimeJST,
-        endTime: endTimeJST,
+        startTime: startTimeUTC,
+        endTime: endTimeUTC,
       }),
     });
-    
+
   const json = await res.json();
   if (!res.ok) {
     // サーバーから返ってきた error メッセージを表示
