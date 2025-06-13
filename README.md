@@ -31,7 +31,7 @@
 # 【アプリリリースURL」
 
 ## ■URL
-URL
+https://original-app-j2hl.vercel.app/
 
 ## ■デモアカウント
  テスト用ID ： staff001  
