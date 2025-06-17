@@ -54,8 +54,6 @@ export default function CreatePostPage() {
 					.eq('id', user.id)
 					.maybeSingle();
 
-				console.log(data);
-
 				if (!error && data) {
 					setFormData((prev) => ({
 						...prev,
@@ -107,8 +105,6 @@ export default function CreatePostPage() {
 			))}
 		</TextField>
 	);
-
-	console.log('フォームデータ', formData);
 
 	const handleSubmit = async () => {
 		if (!formData.auth_id) {

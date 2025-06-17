@@ -85,8 +85,6 @@ export default function ResponseListPage() {
 					return;
 				}
 
-				console.log(data);
-
 				const normalized = data.map(
 					(post: ApiPost): Post => ({
 						id: post.id,
@@ -188,8 +186,6 @@ export default function ResponseListPage() {
 	}, [searchParams]);
 
 	const filteredData = sortedPosts.filter((row) => {
-		console.log('row.date:', row.date);
-
 		const dateObj = dayjs.utc(row.date).tz('Asia/Tokyo');
 
 		const month = dateObj.format('MM');
@@ -237,7 +233,6 @@ export default function ResponseListPage() {
 		if (!row?.startTime) return false;
 		const jpTime = dayjs.utc(row.startTime).tz('Asia/Tokyo');
 		const rowDate = jpTime.format('YYYY-MM-DD');
-		console.log('rowDate:', rowDate);
 		return rowDate === todayDate;
 	}).length;
 

@@ -56,9 +56,6 @@ export default function SignupPage() {
 			body: JSON.stringify(formData),
 		});
 
-		console.log(formData);
-		console.log({ name, email, password, authId });
-
 		const data = await response.json();
 
 		if (response.ok) {

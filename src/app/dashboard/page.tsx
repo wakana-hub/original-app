@@ -117,10 +117,6 @@ export default function DashBoard() {
 
 		setData(summary);
 		setActiveDates(summary.filter((item) => item.count > 0).map((item) => item.date));
-		console.log(
-			'有効日付:',
-			summary.filter((item) => item.count > 0).map((item) => item.date)
-		);
 	};
 
 	useEffect(() => {
@@ -129,8 +125,6 @@ export default function DashBoard() {
 				data: { session },
 				error: sessionError,
 			} = await supabase.auth.getSession();
-
-			console.log(session);
 
 			if (sessionError || !session) {
 				console.log('ログインセッションなし → サインインへ');
