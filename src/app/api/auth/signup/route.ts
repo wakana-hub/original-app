@@ -13,7 +13,6 @@ type SignupData = {
 export async function POST(req: NextRequest) {
 	// ボディを一度だけ読み取って変数に格納
 	const body = await req.json();
-	console.log('受信データ：', body);
 
 	const { name, email, password, auth_id } = body as SignupData;
 

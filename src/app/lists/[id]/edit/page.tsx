@@ -64,8 +64,6 @@ export default function PostEditPage() {
 			data.endTime = data.endTime
 				? dayjs.utc(data.endTime).tz('Asia/Tokyo').format('YYYY-MM-DDTHH:mm')
 				: '';
-			console.log(data.startTime);
-			console.log(data.endTime);
 
 			setFormData(data);
 			setLoading(false);
