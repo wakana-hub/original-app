@@ -49,10 +49,12 @@ export default function DashBoard() {
 	};
 
 	const isDateEnabled = (date: Dayjs | Date) => {
-		const dayjsDate = dayjs(date);
-		const formatted = dayjsDate.format('YYYY-MM-DD');
+		const formatted = dayjs(date).tz('Asia/Tokyo').format('YYYY-MM-DD');
 		return activeDates.includes(formatted);
 	};
+
+	console.log('activeDates:', activeDates);
+
 	const router = useRouter();
 
 	const handleDateChange = (value: Dayjs | Date | null) => {
@@ -86,7 +88,24 @@ export default function DashBoard() {
 		return data?.name || null;
 	};
 
-	const fetchPostSummary = async () => {
+	const fetchActiveDates = async () => {
+		const { data, error } = await supabase.from('post').select('startTime');
+
+		if (error || !data) {
+			console.error('ActiveDates取得エラー:', error);
+			return;
+		}
+
+		const dates = data.map((post) =>
+			dayjs.utc(post.startTime).tz('Asia/Tokyo').format('YYYY-MM-DD')
+		);
+
+		const uniqueDates = [...new Set(dates)];
+
+		setActiveDates(uniqueDates);
+	};
+
+	const fetchWeeklySummary = async () => {
 		const today = dayjs().tz('Asia/Tokyo');
 		const startOfWeek = today.startOf('isoWeek');
 		const endOfWeek = today.endOf('isoWeek');
@@ -97,8 +116,10 @@ export default function DashBoard() {
 			.gte('startTime', startOfWeek.toISOString())
 			.lte('startTime', endOfWeek.toISOString());
 
-		if (error || !data) return;
-
+		if (error || !data) {
+			console.error(error);
+			return;
+		}
 		const counts: Record<string, number> = {};
 
 		for (let i = 0; i < 7; i++) {
@@ -116,7 +137,6 @@ export default function DashBoard() {
 		const summary = Object.entries(counts).map(([date, count]) => ({ date, count }));
 
 		setData(summary);
-		setActiveDates(summary.filter((item) => item.count > 0).map((item) => item.date));
 	};
 
 	useEffect(() => {
@@ -148,7 +168,8 @@ export default function DashBoard() {
 		};
 
 		fetchUser();
-		fetchPostSummary();
+		fetchActiveDates();
+		fetchWeeklySummary();
 	}, [router]);
 
 	if (loading) {
